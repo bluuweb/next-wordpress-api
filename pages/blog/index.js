@@ -56,6 +56,7 @@ export const getStaticProps = async (context) => {
             props: {
                 posts,
             },
+            revalidate: 10,
         };
     } catch (error) {
         console.log(error);
