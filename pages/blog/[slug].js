@@ -3,9 +3,18 @@ import Link from "next/link";
 import Layout from "../../components/Layout";
 
 const Post = ({ post }) => {
+    // console.log(post);
     return (
         <Layout>
             <article className="bg-gray-300">
+                {post._embedded?.["wp:featuredmedia"]?.[0].source_url && (
+                    <img
+                        src={
+                            post._embedded?.["wp:featuredmedia"]?.[0].source_url
+                        }
+                        alt=""
+                    />
+                )}
                 <h2 className="mb-4 text-5xl">
                     id: {post.id} - {post.title.rendered}
                 </h2>
@@ -31,7 +40,7 @@ export const getStaticPaths = async () => {
     const res = await fetch("http://localhost/wp-twitch/wp-json/wp/v2/posts");
     const data = await res.json();
 
-    const arrayPaths = data.map((item) => ({ params: { id: `${item.id}` } }));
+    const arrayPaths = data.map((item) => ({ params: { slug: item.slug } }));
 
     return {
         paths: arrayPaths,
@@ -40,10 +49,18 @@ export const getStaticPaths = async () => {
 };
 
 export const getStaticProps = async ({ params }) => {
+    // const res = await fetch(
+    //     "http://localhost/wp-twitch/wp-json/wp/v2/posts/" +
+    //         params.id +
+    //         "/?_embed"
+    // );
     const res = await fetch(
-        "http://localhost/wp-twitch/wp-json/wp/v2/posts/" + params.id
+        "http://localhost/wp-twitch/wp-json/wp/v2/posts/?_embed"
     );
-    const post = await res.json();
+    const posts = await res.json();
+    const post = posts.find((item) => item.slug === params.slug);
+
+    // console.log(post);
 
     return {
         props: {
