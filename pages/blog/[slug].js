@@ -6,6 +6,14 @@ const Post = ({ post }) => {
     return (
         <Layout>
             <article className="bg-gray-300">
+                {post._embedded?.["wp:featuredmedia"]?.[0].source_url && (
+                    <img
+                        src={
+                            post._embedded?.["wp:featuredmedia"]?.[0].source_url
+                        }
+                        alt=""
+                    />
+                )}
                 <h2 className="mb-4 text-5xl">
                     id: {post.id} - {post.title.rendered}
                 </h2>
@@ -28,22 +36,34 @@ const Post = ({ post }) => {
 export default Post;
 
 export const getStaticPaths = async () => {
-    const res = await fetch("http://localhost/wp-twitch/wp-json/wp/v2/posts");
+    const res = await fetch(
+        "https://ignaciogutierrez.cl/api/wp-json/wp/v2/posts"
+    );
     const data = await res.json();
 
-    const arrayPaths = data.map((item) => ({ params: { id: `${item.id}` } }));
+    const arrayPaths = data.map((item) => ({
+        params: { slug: `${item.slug}` },
+    }));
 
     return {
         paths: arrayPaths,
-        fallback: false, // can also be true or 'blocking'
+        fallback: "blocking", // can also be true or 'blocking'
     };
 };
 
 export const getStaticProps = async ({ params }) => {
+    // const res = await fetch(
+    //     // "http://localhost/wp-twitch/wp-json/wp/v2/posts/" + params.id + '?_embed'
+    //     `http://localhost/wp-twitch/wp-json/wp/v2/posts/${params.id}?_embed`
+    // );
+    // const post = await res.json();
+
     const res = await fetch(
-        "http://localhost/wp-twitch/wp-json/wp/v2/posts/" + params.id
+        "https://ignaciogutierrez.cl/api/wp-json/wp/v2/posts?_embed"
     );
-    const post = await res.json();
+    const posts = await res.json();
+
+    const post = posts.find((item) => item.slug === params.slug);
 
     return {
         props: {
